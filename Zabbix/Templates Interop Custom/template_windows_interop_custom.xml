@@ -1,0 +1,1366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.2</version>
+    <date>2023-02-15T12:52:31Z</date>
+    <groups>
+        <group>
+            <uuid>b5b97d8bd66146188a61e64b9b8ff520</uuid>
+            <name>Template Windows</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <uuid>f3f1882ca3284ed88fa402681d3c596f</uuid>
+            <template>Template Windows INTEROP Custom</template>
+            <name>Template Windows INTEROP Custom</name>
+            <groups>
+                <group>
+                    <name>Template Windows</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <uuid>21eb7d779322431a8d45a46f2ae1e0a3</uuid>
+                    <name>Host alive</name>
+                    <type>CALCULATED</type>
+                    <key>hostalive</key>
+                    <params>(last(//icmpping)) + (last(//net.tcp.service[tcp,{HOST.CONN},{$RDP_PORT}]))</params>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>11e5361ef0934254896f4016c395bdf6</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/hostalive,#2)=0</expression>
+                            <name>Host down!</name>
+                            <priority>DISASTER</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>4492e09aa60a43b5ac15638228b7aac8</uuid>
+                    <name>ICMP Ping</name>
+                    <type>SIMPLE</type>
+                    <key>icmpping</key>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>106b78c1b44b413fb1e928274390828c</uuid>
+                    <name>RPD Port</name>
+                    <type>SIMPLE</type>
+                    <key>net.tcp.service[tcp,{HOST.CONN},{$RDP_PORT}]</key>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS raw itens</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>e242dd68425747c08c607fd82431b197</uuid>
+                    <name>Pagefile % Usage</name>
+                    <type>CALCULATED</type>
+                    <key>PagefilePercentUsage</key>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <params>last(//system.swap.size[,used]) / last(//vm.memory.size[total]) * 100</params>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>afa1aa6efc7d475b95632341fdfcfd6a</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/PagefilePercentUsage)&gt;{$PAGEFILE.WARN} and last(/Template OS Windows INTEROP Custom/PagefilePercentUsage)&lt;{$PAGEFILE.HIGH}</expression>
+                            <name>Pagefile % Usage hit threshold (&gt;90% &lt;95%). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <uuid>acb000161cfd4456a3f379ca8885a43b</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/PagefilePercentUsage)&gt;{$PAGEFILE.HIGH}</expression>
+                            <name>Pagefile % Usage hit threshold. (&gt;95%). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>7e27729b5eb94621a3de23a3df679a1c</uuid>
+                    <name>Processor Time % Usage</name>
+                    <key>system.cpu.util</key>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <description>CPU utilization in %</description>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>dfb4b82518694b5d8b3dbc5beb45ea31</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/system.cpu.util)&lt;{$CPU.UTIL.CRIT} and last(/Template OS Windows INTEROP Custom/system.cpu.util)&gt;={$CPU.UTIL.WARN}</expression>
+                            <name>Percentage CPU Utilization hit threshold. (&gt;85 &lt;90). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Percentage CPU Utilization hit threshold. (&gt;90). Current value: {ITEM.LASTVALUE}</name>
+                                    <expression>min(/Template OS Windows INTEROP Custom/system.cpu.util,5m)&gt;{$CPU.UTIL.CRIT}</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                        <trigger>
+                            <uuid>dfc9d81c381a4eb6a2b5a3e7f7badf28</uuid>
+                            <expression>min(/Template OS Windows INTEROP Custom/system.cpu.util,5m)&gt;{$CPU.UTIL.CRIT}</expression>
+                            <name>Percentage CPU Utilization hit threshold. (&gt;90). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>AVERAGE</priority>
+                            <description>CPU utilization is too high. The system might be slow to respond.</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>b2760072e33f423eb943a8319e3b448c</uuid>
+                    <name>Swap Used</name>
+                    <key>system.swap.size[,used]</key>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS raw itens</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>29c603c53b4d43059ee78f266489f21e</uuid>
+                    <name>Uptime in Seconds</name>
+                    <key>system.uptime</key>
+                    <units>uptime</units>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>c28bd19817ca43c98c6976706aa5fc5a</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/system.uptime)&gt;10m and last(/Template OS Windows INTEROP Custom/system.uptime)&lt;=20m</expression>
+                            <name>Uptime hit threshold (&lt;1200 &gt;600). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <uuid>b0052007be35467aa5f32a82d6513db4</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/system.uptime)&lt;=10m</expression>
+                            <name>Uptime hit threshold. (&lt;600). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>37db68f2f7404c8ba2be3b79bc535bd0</uuid>
+                    <name>Total memory</name>
+                    <key>vm.memory.size[total]</key>
+                    <history>7d</history>
+                    <units>B</units>
+                    <description>Total memory in Bytes</description>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS raw itens</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>fd735eb6134a4dc5873e10ff88aeb1f7</uuid>
+                    <name>Used memory</name>
+                    <key>vm.memory.size[used]</key>
+                    <history>7d</history>
+                    <units>B</units>
+                    <description>Used memory in Bytes</description>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS raw itens</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>ecfbe21fe88d4f318d4c3e341904fa09</uuid>
+                    <name>Physical Memory % Usage</name>
+                    <type>CALCULATED</type>
+                    <key>vm.memory.util</key>
+                    <history>7d</history>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <params>last(//vm.memory.size[used]) / last(//vm.memory.size[total]) * 100</params>
+                    <description>Memory utilization in %</description>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>2bfa6bf788f54fe594be43722722e5e9</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/vm.memory.util)&gt;{$MEMORY.USED.HIGH}</expression>
+                            <name>Physical Memory % Usage hit threshold. (&gt;95%). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <uuid>fe99be31ebdc4157b04039c47f9e01d9</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/vm.memory.util)&gt;{$MEMORY.USED.WARN} and last(/Template OS Windows INTEROP Custom/vm.memory.util)&lt;{$MEMORY.USED.HIGH}</expression>
+                            <name>Physical Memory % Usage hit threshold. (&gt;95%). Current value: {ITEM.LASTVALUE}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>d3f6942b8a9f4095aeef0e8b9010456f</uuid>
+                    <name>Network interfaces WMI get</name>
+                    <key>wmi.getall[root\cimv2,&quot;select * from win32_networkadapter where PhysicalAdapter=True&quot;]</key>
+                    <history>1h</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>Raw data of win32_networkadapter.</description>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS raw itens</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>bad86f0f23bb4edf8c6bf629920fcd9c</uuid>
+                    <name>Physical disks WMI get</name>
+                    <key>wmi.getall[root\cimv2,&quot;select * from win32_perfformatteddata_perfdisk_physicaldisk&quot;]</key>
+                    <delay>30s</delay>
+                    <history>1h</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>Raw data of win32_perfformatteddata_perfdisk_physicaldisk.</description>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>OS raw itens</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>205873a20c5b4ae881a014de5371a17c</uuid>
+                    <name>Zabbix agent availability</name>
+                    <type>INTERNAL</type>
+                    <key>zabbix[host,agent,available]</key>
+                    <history>7d</history>
+                    <description>Monitoring agent availability status</description>
+                    <tags>
+                        <tag>
+                            <tag>Type</tag>
+                            <value>Application</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>80b42bd789374b41a3d116491f79c60f</uuid>
+                            <expression>max(/Template OS Windows INTEROP Custom/zabbix[host,agent,available],{$AGENT.TIMEOUT})=0</expression>
+                            <name>Zabbix agent is not available (for {$AGENT.TIMEOUT})</name>
+                            <priority>DISASTER</priority>
+                            <description>For passive only agents, host availability is used with {$AGENT.TIMEOUT} as time threshold.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <uuid>40f97502f3c14ad09e98b9818000e84f</uuid>
+                    <name>Network interfaces discovery</name>
+                    <type>DEPENDENT</type>
+                    <key>net.if.discovery</key>
+                    <delay>0</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#IFALIAS}</macro>
+                                <value>{$NET.IF.IFALIAS.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFALIAS}</macro>
+                                <value>{$NET.IF.IFALIAS.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFDESCR}</macro>
+                                <value>{$NET.IF.IFDESCR.MATCHES}</value>
+                                <formulaid>C</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFDESCR}</macro>
+                                <value>{$NET.IF.IFDESCR.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFNAME}</macro>
+                                <value>{$NET.IF.IFNAME.MATCHES}</value>
+                                <formulaid>E</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFNAME}</macro>
+                                <value>{$NET.IF.IFNAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>F</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFNETENABLED}</macro>
+                                <value>{$NET.IF.IFNETENABLED.MATCHES}</value>
+                                <formulaid>G</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFNETENABLED}</macro>
+                                <value>{$NET.IF.IFNETENABLED.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>H</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFPHYSICALADAPTER}</macro>
+                                <value>{$NET.IF.PHYSICALADAPTER.MATCHES}</value>
+                                <formulaid>I</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFPHYSICALADAPTER}</macro>
+                                <value>{$NET.IF.PHYSICALADAPTER.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>J</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <description>Discovery of installed network interfaces.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>8634cde5c6bc4c3a9cbe2ec901471b1d</uuid>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Inbound packets discarded</name>
+                            <key>net.if.in[&quot;{#IFNAME}&quot;,dropped]</key>
+                            <delay>3m</delay>
+                            <history>7d</history>
+                            <description>The number of incoming packets dropped on the network interface.</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>58ffe1bc6b9349b58170579835f77873</uuid>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Inbound packets with errors</name>
+                            <key>net.if.in[&quot;{#IFNAME}&quot;,errors]</key>
+                            <delay>3m</delay>
+                            <history>7d</history>
+                            <description>The number of incoming packets with errors on the network interface.</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>dd3992e0acb24ecd83f3c0238ebd4b1d</uuid>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Bits received</name>
+                            <key>net.if.in[&quot;{#IFNAME}&quot;]</key>
+                            <delay>3m</delay>
+                            <history>7d</history>
+                            <units>bps</units>
+                            <description>Incoming traffic on the network interface.</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <parameters>
+                                        <parameter>8</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>37ed6865f5644f579765eadb48ac6f81</uuid>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Outbound packets discarded</name>
+                            <key>net.if.out[&quot;{#IFNAME}&quot;,dropped]</key>
+                            <delay>3m</delay>
+                            <history>7d</history>
+                            <description>The number of outgoing packets dropped on the network interface.</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>48a530d5baf04de5bf921da9d533a271</uuid>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Outbound packets with errors</name>
+                            <key>net.if.out[&quot;{#IFNAME}&quot;,errors]</key>
+                            <delay>3m</delay>
+                            <history>7d</history>
+                            <description>The number of outgoing packets with errors on the network interface.</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>c02cba7dc1074f52b75e9ebc4429ebf9</uuid>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Bits sent</name>
+                            <key>net.if.out[&quot;{#IFNAME}&quot;]</key>
+                            <delay>3m</delay>
+                            <history>7d</history>
+                            <units>bps</units>
+                            <description>Outgoing traffic on the network interface.</description>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <parameters>
+                                        <parameter/>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <parameters>
+                                        <parameter>8</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>27352b318a50492a82024f0053dbf372</uuid>
+                            <name>Network {#IFNAME}({#IFALIAS}): Interface Status</name>
+                            <type>DEPENDENT</type>
+                            <key>net.if.status[&quot;{#IFNAME}&quot;]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <description>The operational status of the network interface.</description>
+                            <valuemap>
+                                <name>Win32_NetworkAdapter::NetConnectionStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$[?(@.Name == &quot;{#IFNAME}&quot;)].NetConnectionStatus.first()</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>wmi.getall[root\cimv2,&quot;select * from win32_networkadapter where PhysicalAdapter=True&quot;]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>6adbcc45c04540f49e9458ad811db57e</uuid>
+                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and (last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;])=2 and (last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;],#1)&lt;&gt;last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;],#2))=1)</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;])&lt;&gt;2</recovery_expression>
+                                    <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
+                                    <opdata>Current state: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>DISASTER</priority>
+                                    <description>This trigger expression works as follows:
+1. Can be triggered if operations status is down.
+2. {$IFCONTROL:&quot;{#IFNAME}&quot;}=1 - user can redefine Context macro to value - 0. That marks this interface as not important. No new trigger will be fired if this interface is down.
+3. {TEMPLATE_NAME:METRIC.diff()}=1) - trigger fires only if operational status was up(1) sometime before. (So, do not fire 'ethernal off' interfaces.)
+
+WARNING: if closed manually - won't fire again on next poll, because of .diff.</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>23bcd0148aae4fd4b4320c06c5194b88</uuid>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Output Queue Length</name>
+                            <key>perf_counter_en[\Network Interface(*)\Output Queue Length, 60]</key>
+                            <description>This measures the length of the output packet queue, in packets. There is network saturation if the value is more than 2. You can address this problem by adding a faster network card or segmenting the network.</description>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Interface</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>5c5252561b1545cdb874628e0b557260</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/perf_counter_en[\Network Interface(*)\Output Queue Length, 60])&gt;0</expression>
+                                    <name>[{HOST.NAME}] Average Network Output Queue Length</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>d3c0204682bc41ca9526b404c3c4f686</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/perf_counter_en[\Network Interface(*)\Output Queue Length, 60])&gt;2</expression>
+                                    <name>[{HOST.NAME}] Average Network Output Queue Length</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <uuid>0762e1f1ace54852b242dbedbbfde3ce</uuid>
+                            <expression>min(/Template OS Windows INTEROP Custom/net.if.in[&quot;{#IFNAME}&quot;,errors],5m)&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;} or min(/Template OS Windows INTEROP Custom/net.if.out[&quot;{#IFNAME}&quot;,errors],5m)&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>max(/Template OS Windows INTEROP Custom/net.if.in[&quot;{#IFNAME}&quot;,errors],5m)&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8 and max(/Template OS Windows INTEROP Custom/net.if.out[&quot;{#IFNAME}&quot;,errors],5m)&lt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;}*0.8</recovery_expression>
+                            <name>Interface {#IFNAME}({#IFALIAS}): High error rate</name>
+                            <event_name>Interface {#IFNAME}({#IFALIAS}): High error rate (&gt;{$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;} for 5m)</event_name>
+                            <opdata>errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Recovers when below 80% of {$IF.ERRORS.WARN:&quot;{#IFNAME}&quot;} threshold</description>
+                            <dependencies>
+                                <dependency>
+                                    <name>Interface {#IFNAME}({#IFALIAS}): Link down</name>
+                                    <expression>{$IFCONTROL:&quot;{#IFNAME}&quot;}=1 and (last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;])=2 and (last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;],#1)&lt;&gt;last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;],#2))=1)</expression>
+                                    <recovery_expression>last(/Template OS Windows INTEROP Custom/net.if.status[&quot;{#IFNAME}&quot;])&lt;&gt;2</recovery_expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <master_item>
+                        <key>wmi.getall[root\cimv2,&quot;select * from win32_networkadapter where PhysicalAdapter=True&quot;]</key>
+                    </master_item>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>output = JSON.parse(value).map(function(net){
+    return {
+        &quot;{#IFNAME}&quot;: net.Name,
+        &quot;{#IFDESCR}&quot;: net.Description,
+        &quot;{#IFPHYSICALADAPTER}&quot;: net.PhysicalAdapter,
+        &quot;{#IFALIAS}&quot; : net.NetConnectionID,
+        &quot;{#IFNETENABLED}&quot;: net.NetEnabled,
+        &quot;{#IFNETSTATUS}&quot;: net.NetConnectionStatus,
+        &quot;{#IFSPEED}&quot;: net.Speed
+    }})
+return JSON.stringify({&quot;data&quot;: output})</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <parameters>
+                                <parameter>1h</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+                <discovery_rule>
+                    <uuid>5e8a11d3576948d3a7dad3bbffe05781</uuid>
+                    <name>LLD Servico Windows</name>
+                    <key>service.discovery</key>
+                    <delay>30s</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#SERVICE.NAME}</macro>
+                                <value>{$SERVICE.NAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#SERVICE.NAME}</macro>
+                                <value>{$SERVICE.NAME.MATCHES}</value>
+                                <formulaid>B</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#SERVICE.STARTUPNAME}</macro>
+                                <value>{$SERVICE.STARTUPNAME.MATCHES}</value>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#SERVICE.NAME}</macro>
+                                <value>{$SERVICE.NAME.NOT}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>C</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>0</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>6dd557c2ff4041e4aaecab8f5697022b</uuid>
+                            <name>Status do Serviço &quot;{#SERVICE.NAME}&quot; ({#SERVICE.DISPLAYNAME})</name>
+                            <key>service.info[&quot;{#SERVICE.NAME}&quot;,startup]</key>
+                            <delay>30s</delay>
+                            <value_type>FLOAT</value_type>
+                            <valuemap>
+                                <name>Windows Service State</name>
+                            </valuemap>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Services</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>c56f93d7cacb4d5e80bf84bbe986609c</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/service.info[&quot;{#SERVICE.NAME}&quot;,startup],#3)&lt;&gt;0</expression>
+                                    <name>&quot;{#SERVICE.NAME}&quot; ({#SERVICE.DISPLAYNAME}) is not running</name>
+                                    <priority>DISASTER</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <uuid>f739d1e615be4d3699d36934bd218590</uuid>
+                    <name>Physical disks discovery</name>
+                    <type>DEPENDENT</type>
+                    <key>vfs.dev.discovery</key>
+                    <delay>0</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#DEVNAME}</macro>
+                                <value>{$VFS.DEV.DEVNAME.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#DEVNAME}</macro>
+                                <value>{$VFS.DEV.DEVNAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <description>Discovery of installed physical disks.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>ada35c6769fd4164b590f335da35f664</uuid>
+                            <name>{#DEVNAME}: Average Disk Queue Length</name>
+                            <type>DEPENDENT</type>
+                            <key>vfs.dev.queue_size[CurrentDiskQueueLength.{#DEVNAME}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <description>Current average disk queue, the number of requests outstanding on the disk at the time the performance data is collected.</description>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$[?(@.Name == &quot;{#DEVNAME}&quot;)].CurrentDiskQueueLength.first()</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>wmi.getall[root\cimv2,&quot;select * from win32_perfformatteddata_perfdisk_physicaldisk&quot;]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Disk</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>01013fec2e924be097710951a67f326f</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.queue_size[CurrentDiskQueueLength.{#DEVNAME}])&gt;= 1 and last(/Template OS Windows INTEROP Custom/vfs.dev.queue_size[CurrentDiskQueueLength.{#DEVNAME}]) &lt; 2</expression>
+                                    <name>{#DEVNAME}: Average Disk Queue Length hit threshold (&gt;=1 &lt;2). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>aa90b1901fae419ead4da87dd9d90780</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.queue_size[CurrentDiskQueueLength.{#DEVNAME}])&gt;=2</expression>
+                                    <name>{#DEVNAME}: Average Disk Queue Length hit threshold (&gt;=2). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>367a8c490a8e4027b44a5cd948aba55a</uuid>
+                            <name>{#DEVNAME}:Disk Bytes Per sec</name>
+                            <type>DEPENDENT</type>
+                            <key>vfs.dev.read.rate[DiskBytesPersec{#DEVNAME}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$[?(@.Name == &quot;{#DEVNAME}&quot;)].DiskBytesPersec.first()</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>wmi.getall[root\cimv2,&quot;select * from win32_perfformatteddata_perfdisk_physicaldisk&quot;]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Disk</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>7e460b5b4b2d4f82b2fdb2c900cd5ef3</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[DiskBytesPersec{#DEVNAME}])&gt; 99999998 and last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[DiskBytesPersec{#DEVNAME}])&lt; 99999999</expression>
+                                    <name>{#DEVNAME}: Disk Bytes Per sec hit threshold (&gt;99999998 &lt;99999999). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>b20d3afdfdb9430e8981ea6cad04f959</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[DiskBytesPersec{#DEVNAME}])&gt; 99999999</expression>
+                                    <name>{#DEVNAME}: Disk Bytes Per sec hit threshold. (&gt;99999999). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>5962148c59e9498fb934c34fffc29217</uuid>
+                            <name>{#DEVNAME}:Percent Disk Read Time</name>
+                            <type>DEPENDENT</type>
+                            <key>vfs.dev.read.rate[PercentDiskReadTime{#DEVNAME}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$[?(@.Name == &quot;{#DEVNAME}&quot;)].PercentDiskReadTime.first()</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>wmi.getall[root\cimv2,&quot;select * from win32_perfformatteddata_perfdisk_physicaldisk&quot;]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Disk</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>f6333fd38c5d4655b2280838577258e7</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[PercentDiskReadTime{#DEVNAME}])&gt;{$VFS.DEV.READ.UTIL.MAX.WARN} and last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[PercentDiskReadTime{#DEVNAME}])&lt;{$VFS.DEV.READ.UTIL.MAX.CRIT}</expression>
+                                    <name>{#DEVNAME}: % Disk Read Time hit threshold (&gt;80 &lt;90). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>b5d9ed4e3f714675adae080b834e6aa4</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[PercentDiskReadTime{#DEVNAME}])&gt;{$VFS.DEV.READ.UTIL.MAX.CRIT}</expression>
+                                    <name>{#DEVNAME}:  % Disk Read Time hit threshold. (&gt;90). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>c1799ffd7e97467ba8dd1d1bedb7c521</uuid>
+                            <name>{#DEVNAME}:Percent Disk Write Time</name>
+                            <type>DEPENDENT</type>
+                            <key>vfs.dev.read.rate[PercentDiskWriteTime{#DEVNAME}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$[?(@.Name == &quot;{#DEVNAME}&quot;)].PercentDiskWriteTime.first()</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>wmi.getall[root\cimv2,&quot;select * from win32_perfformatteddata_perfdisk_physicaldisk&quot;]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Disk</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>13d5d7ec68f24236b750e5f90299b1ee</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[PercentDiskWriteTime{#DEVNAME}])&gt;{$VFS.DEV.WRITE.UTIL.MAX.WARN} and last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[PercentDiskWriteTime{#DEVNAME}])&lt;{$VFS.DEV.WRITE.UTIL.MAX.CRIT}</expression>
+                                    <name>{#DEVNAME}: % Disk Write Time hit threshold (&gt;80 &lt;90). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>5b5c246389ac483caca91707e46d12d6</uuid>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.dev.read.rate[PercentDiskWriteTime{#DEVNAME}])&gt;{$VFS.DEV.WRITE.UTIL.MAX.CRIT}</expression>
+                                    <name>{#DEVNAME}: % Disk Write Time hit threshold. (&gt;90). Current value: {ITEM.LASTVALUE}</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <master_item>
+                        <key>wmi.getall[root\cimv2,&quot;select * from win32_perfformatteddata_perfdisk_physicaldisk&quot;]</key>
+                    </master_item>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>output = JSON.parse(value).map(function(dev){
+    return {
+        &quot;{#DEVNAME}&quot;: dev.Name,
+        &quot;{#DEVQUEUE}&quot;: dev.CurrentDiskQueueLength,
+        &quot;{#DEVREADS}&quot;: dev.DiskReadsPersec,
+        &quot;{#DEVTIME}&quot;: dev.PercentDiskTime,
+        &quot;{#DEVWRITES}&quot;: dev.DiskWritesPersec
+    }})
+return JSON.stringify({&quot;data&quot;: output})</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <parameters>
+                                <parameter>1h</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+                <discovery_rule>
+                    <uuid>07b52c0c4ded46ed99c1efdcf4ad9888</uuid>
+                    <name>Mounted filesystem discovery</name>
+                    <key>vfs.fs.discovery</key>
+                    <delay>1h</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#FSDRIVETYPE}</macro>
+                                <value>{$VFS.FS.FSDRIVETYPE.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSDRIVETYPE}</macro>
+                                <value>{$VFS.FS.FSDRIVETYPE.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSNAME}</macro>
+                                <value>{$VFS.FS.FSNAME.MATCHES}</value>
+                                <formulaid>C</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSNAME}</macro>
+                                <value>{$VFS.FS.FSNAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSTYPE}</macro>
+                                <value>{$VFS.FS.FSTYPE.MATCHES}</value>
+                                <formulaid>E</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSTYPE}</macro>
+                                <value>{$VFS.FS.FSTYPE.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>F</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <description>Discovery of file systems of different types.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>59ecb7b3a94a45eca45216c4de61bc80</uuid>
+                            <name>{#FSNAME}: % Used Space</name>
+                            <key>vfs.fs.size[{#FSNAME},pused]</key>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>%</units>
+                            <description>Space utilization in % for {#FSNAME}</description>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Disk</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>d33f40aae01543ee8e625972f3736c39</uuid>
+                            <name>{#FSNAME}: Total space</name>
+                            <key>vfs.fs.size[{#FSNAME},total]</key>
+                            <history>7d</history>
+                            <units>B</units>
+                            <description>Total space in Bytes</description>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Disk raw itens</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>f909da2bfe7a4f559b80300251fc1f73</uuid>
+                            <name>{#FSNAME}: Used space</name>
+                            <key>vfs.fs.size[{#FSNAME},used]</key>
+                            <history>7d</history>
+                            <units>B</units>
+                            <description>Used storage in Bytes</description>
+                            <tags>
+                                <tag>
+                                    <tag>Type</tag>
+                                    <value>Disk raw itens</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <uuid>7472a60ea9724909a84aa4335639393c</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},pused])&gt;{$VFS.FS.PUSED.MAX.WARN:&quot;{#FSNAME}&quot;} and
+((last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},total])-last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},used]))&lt;10G or timeleft(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},pused],1h,100)&lt;1d)</expression>
+                            <name>{#FSNAME}: % Used Space hit threshold. (&gt;85 &lt;=90 ). Current value: {ITEM.LASTVALUE}</name>
+                            <opdata>Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})</opdata>
+                            <priority>AVERAGE</priority>
+                            <description>Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.WARN:&quot;{#FSNAME}&quot;}.
+ Second condition should be one of the following:
+ - The disk free space is less than 10G.
+ - The disk will be full in less than 24 hours.</description>
+                            <dependencies>
+                                <dependency>
+                                    <name>{#FSNAME}:% Used Space hit threshold. (&gt;90). Current value: {ITEM.LASTVALUE}</name>
+                                    <expression>last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},pused])&gt;{$VFS.FS.PUSED.MAX.CRIT:&quot;{#FSNAME}&quot;} and
+((last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},total])-last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},used]))&lt;5G or timeleft(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},pused],1h,100)&lt;1d)</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <uuid>ba6f5c6865574949b17ab2112fb32223</uuid>
+                            <expression>last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},pused])&gt;{$VFS.FS.PUSED.MAX.CRIT:&quot;{#FSNAME}&quot;} and
+((last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},total])-last(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},used]))&lt;5G or timeleft(/Template OS Windows INTEROP Custom/vfs.fs.size[{#FSNAME},pused],1h,100)&lt;1d)</expression>
+                            <name>{#FSNAME}:% Used Space hit threshold. (&gt;90). Current value: {ITEM.LASTVALUE}</name>
+                            <opdata>Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})</opdata>
+                            <priority>HIGH</priority>
+                            <description>Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.CRIT:&quot;{#FSNAME}&quot;}.
+ Second condition should be one of the following:
+ - The disk free space is less than 5G.
+ - The disk will be full in less than 24 hours.</description>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$AGENT.TIMEOUT}</macro>
+                    <value>3m</value>
+                </macro>
+                <macro>
+                    <macro>{$CPU.INTERRUPT.CRIT.MAX}</macro>
+                    <value>50</value>
+                </macro>
+                <macro>
+                    <macro>{$CPU.PRIV.CRIT.MAX}</macro>
+                    <value>30</value>
+                </macro>
+                <macro>
+                    <macro>{$CPU.QUEUE.CRIT.MAX}</macro>
+                    <value>3</value>
+                </macro>
+                <macro>
+                    <macro>{$CPU.UTIL.CRIT}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$CPU.UTIL.WARN}</macro>
+                    <value>85</value>
+                </macro>
+                <macro>
+                    <macro>{$IF.ERRORS.WARN}</macro>
+                    <value>2</value>
+                </macro>
+                <macro>
+                    <macro>{$IF.UTIL.MAX}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$IFCONTROL}</macro>
+                    <value>1</value>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.USED.HIGH}</macro>
+                    <value>95</value>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.USED.WARN}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFALIAS.MATCHES}</macro>
+                    <value>.*</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFALIAS.NOT_MATCHES}</macro>
+                    <value>CHANGE_THIS</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFDESCR.MATCHES}</macro>
+                    <value>.*</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFDESCR.NOT_MATCHES}</macro>
+                    <value>CHANGE_THIS</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNAME.MATCHES}</macro>
+                    <value>.*</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNAME.NOT_MATCHES}</macro>
+                    <value>Miniport|Virtual|Teredo|Kernel|Loopback|Bluetooth|HTTPS|6to4|QoS|Layer</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNETENABLED.MATCHES}</macro>
+                    <value>True</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNETENABLED.NOT_MATCHES}</macro>
+                    <value>CHANGE_THIS</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.PHYSICALADAPTER.MATCHES}</macro>
+                    <value>True</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.PHYSICALADAPTER.NOT_MATCHES}</macro>
+                    <value>CHANGE_THIS</value>
+                </macro>
+                <macro>
+                    <macro>{$PAGEFILE.HIGH}</macro>
+                    <value>95</value>
+                </macro>
+                <macro>
+                    <macro>{$PAGEFILE.WARN}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$RDP_PORT}</macro>
+                    <value>3389</value>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.NAME.MATCHES}</macro>
+                    <value>^.*$</value>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.NAME.NOT}</macro>
+                    <value>^(?:WinRM*$|AdobeARMservice|BFE|BrokerInfrastructure|Dhcp|DPS|Winmgmt|Wecsvc|UALSVC|TrkWks|Themes|TermServLicensing|ProfSvc|SENS|OpMonAgent|nsi|NlaSvc|Netlogon|MSDTC|iphlpsvc|IKEEXT|lmhosts|Dnscache)$</value>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.NAME.NOT_MATCHES}</macro>
+                    <value>^(?:RemoteRegistry|MMCSS|gupdate|SysmonLog|clr_optimization_v.+|sppsvc|gpsvc|Pml Driver HPZ12|Net Driver HPZ12|MapsBroker|IntelAudioService|Intel\(R\) TPM Provisioning Service|dbupdate|DoSvc|CDPUserSvc_.+|WpnUserService_.+|OneSyncSvc_.+|WbioSrvc|BITS|tiledatamodelsvc|GISvc|ShellHWDetection|TrustedInstaller|TabletInputService|CDPSvc|wuauserv)$</value>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.STARTUPNAME.MATCHES}</macro>
+                    <value>^(?:automatic|automatic delayed)$</value>
+                </macro>
+                <macro>
+                    <macro>{$SERVICE.STARTUPNAME.NOT_MATCHES}</macro>
+                    <value>^(?:manual|disabled)$</value>
+                </macro>
+                <macro>
+                    <macro>{$VFS.DEV.DEVNAME.MATCHES}</macro>
+                    <value>.*</value>
+                    <description>This macro is used in physical disks discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.DEV.DEVNAME.NOT_MATCHES}</macro>
+                    <value>_Total</value>
+                    <description>This macro is used in physical disks discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.DEV.READ.UTIL.MAX.CRIT}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$VFS.DEV.READ.UTIL.MAX.WARN}</macro>
+                    <value>80</value>
+                    <description>The warning threshold of disk time utilization in percent.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.DEV.WRITE.UTIL.MAX.CRIT}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$VFS.DEV.WRITE.UTIL.MAX.WARN}</macro>
+                    <value>80</value>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSDRIVETYPE.MATCHES}</macro>
+                    <value>fixed</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSDRIVETYPE.NOT_MATCHES}</macro>
+                    <value>^\s$</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSNAME.MATCHES}</macro>
+                    <value>.*</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSNAME.NOT_MATCHES}</macro>
+                    <value>^(/dev|/sys|/run|/proc|.+/shm$)</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSTYPE.MATCHES}</macro>
+                    <value>.*</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSTYPE.NOT_MATCHES}</macro>
+                    <value>^\s$</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.PUSED.MAX.CRIT}</macro>
+                    <value>90</value>
+                    <description>The critical threshold of the filesystem utilization in percent.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.PUSED.MAX.WARN}</macro>
+                    <value>85</value>
+                    <description>The warning threshold of the filesystem utilization in percent.</description>
+                </macro>
+            </macros>
+            <valuemaps>
+                <valuemap>
+                    <uuid>726ca25592404fe0a8a6be9fa9803a70</uuid>
+                    <name>Win32_NetworkAdapter::AdapterTypeId</name>
+                    <mappings>
+                        <mapping>
+                            <value>0</value>
+                            <newvalue>Ethernet 802.3</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>Token Ring 802.5</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>Fiber Distributed Data Interface (FDDI)</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>3</value>
+                            <newvalue>Wide Area Network (WAN)</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>4</value>
+                            <newvalue>LocalTalk</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>5</value>
+                            <newvalue>Ethernet using DIX header format</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>6</value>
+                            <newvalue>ARCNET</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>7</value>
+                            <newvalue>ARCNET (878.2)</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>8</value>
+                            <newvalue>ATM</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>9</value>
+                            <newvalue>Wireless</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>10</value>
+                            <newvalue>Infrared Wireless</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>11</value>
+                            <newvalue>Bpc</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>12</value>
+                            <newvalue>CoWan</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>13</value>
+                            <newvalue>1394</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+                <valuemap>
+                    <uuid>3b35ececd12a40d797ba9202f5c1384f</uuid>
+                    <name>Win32_NetworkAdapter::NetConnectionStatus</name>
+                    <mappings>
+                        <mapping>
+                            <value>0</value>
+                            <newvalue>Disconnected</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>Connecting</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>Connected</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>3</value>
+                            <newvalue>Disconnecting</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>4</value>
+                            <newvalue>Hardware Not Present</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>5</value>
+                            <newvalue>Hardware Disabled</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>6</value>
+                            <newvalue>Hardware Malfunction</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>7</value>
+                            <newvalue>Media Disconnected</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>8</value>
+                            <newvalue>Authenticating</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>9</value>
+                            <newvalue>Authentication Succeeded</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>10</value>
+                            <newvalue>Authentication Failed</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>11</value>
+                            <newvalue>Invalid Address</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>12</value>
+                            <newvalue>Credentials Required</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+                <valuemap>
+                    <uuid>88d863bb51664d7085efb651d2ed00f4</uuid>
+                    <name>Windows Service State</name>
+                    <mappings>
+                        <mapping>
+                            <value>0</value>
+                            <newvalue>Running</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>Paused</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>Start pending</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>3</value>
+                            <newvalue>Paused pending</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>4</value>
+                            <newvalue>Continue pending</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>5</value>
+                            <newvalue>Stop pending</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>6</value>
+                            <newvalue>Stopped</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>7</value>
+                            <newvalue>Unknown</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>255</value>
+                            <newvalue>No such service</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+            </valuemaps>
+        </template>
+    </templates>
+</zabbix_export>

@@ -1,0 +1,1136 @@
+zabbix_export:
+  version: '6.0'
+  date: '2023-03-09T18:26:28Z'
+  groups:
+    -
+      uuid: 1961019ccff84f0aabb54eb2f9328323
+      name: 'Novo Template Linux Interop'
+  templates:
+    -
+      uuid: 9def8e1328ee4d6686f49b4986c20e7b
+      template: 'Template Linux INTEROP Custom'
+      name: 'Template Linux INTEROP Custom'
+      groups:
+        -
+          name: 'Novo Template Linux Interop'
+      items:
+        -
+          uuid: 43c3b9cd64da47d184aa442e2b0f8b2a
+          name: 'Host Alive'
+          type: CALCULATED
+          key: hostalive
+          params: '(last(//icmpping)) + (last(//net.tcp.service[ssh,{HOST.CONN},{$SSH_PORT}]))'
+          tags:
+            -
+              tag: 'Type Host'
+              value: 'Server Linux'
+          triggers:
+            -
+              uuid: d884ebfc227a4555b5c340096853691b
+              expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+              name: 'Host down!'
+              priority: DISASTER
+        -
+          uuid: f34a864207104d219b3c1f3f4608028e
+          name: 'Ping Status'
+          type: SIMPLE
+          key: icmpping
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: 91a094755ede47a9894c9b604d8bd689
+              expression: 'last(/Template Linux INTEROP Custom/icmpping)=0'
+              name: 'Machine No Answer for ICMP'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: 359a8f4b9b5c457ba39b2225494b012a
+          name: 'SSH Port'
+          type: SIMPLE
+          key: 'net.tcp.service[ssh,{HOST.CONN},{$SSH_PORT}]'
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: 2aaba42795054317a8ce5a5aebe9cf11
+              expression: 'last(/Template Linux INTEROP Custom/net.tcp.service[ssh,{HOST.CONN},{$SSH_PORT}])=0'
+              name: 'SSH port is closed'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: 178b932a53ed472597161aafd697d808
+          name: 'Zumbi Processes'
+          key: 'proc.num[,,zomb,]'
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: 25f5a5cf1a2549b1866a84863f744a64
+              expression: 'last(/Template Linux INTEROP Custom/proc.num[,,zomb,])>5'
+              name: 'Zumbi Processes hit threshold. (>5). Current value: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: d1c2f1786cfe42758dc441567d94e88a
+          name: 'Discover geral Services'
+          key: services.raw
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+        -
+          uuid: 59e136ae5ea747238c207b35b82ae069
+          name: Load
+          key: 'system.cpu.load[all,avg5]'
+          value_type: FLOAT
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: 2b8164196a204095b9350fb5244ca4ae
+              expression: 'last(/Template Linux INTEROP Custom/system.cpu.load[all,avg5])>=3 and last(/Template Linux INTEROP Custom/system.cpu.load[all,avg5])<4'
+              name: 'Load hit threshold (>3 <4). Current value: {ITEM.LASTVALUE}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+                -
+                  name: 'Load hit threshold (>4). Current value: {ITEM.LASTVALUE}'
+                  expression: 'last(/Template Linux INTEROP Custom/system.cpu.load[all,avg5])>=4'
+            -
+              uuid: 95ea2a77a09e4c3188dd0ec9db5571e0
+              expression: 'last(/Template Linux INTEROP Custom/system.cpu.load[all,avg5])>=4'
+              name: 'Load hit threshold (>4). Current value: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: 0fe43c68bc9643a29697b6df9e0b9b90
+          name: 'CPU % Avg Usage'
+          key: system.cpu.util
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: 06b4331688d74ab5a2361e9119667faa
+              expression: 'last(/Template Linux INTEROP Custom/system.cpu.util)<{$CPU.UTIL.CRIT} and last(/Template Linux INTEROP Custom/system.cpu.util)>={$CPU.UTIL.WARN}'
+              name: 'Percentage CPU Utilization hit threshold. (>95 <98). Current value: {ITEM.LASTVALUE}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+                -
+                  name: 'Percentage CPU Utilization hit threshold. (>98). Current value: {ITEM.LASTVALUE}'
+                  expression: 'last(/Template Linux INTEROP Custom/system.cpu.util)>={$CPU.UTIL.CRIT}'
+            -
+              uuid: 2122e8c7b6a04cec8a4916a3579fb759
+              expression: 'last(/Template Linux INTEROP Custom/system.cpu.util)>={$CPU.UTIL.CRIT}'
+              name: 'Percentage CPU Utilization hit threshold. (>98). Current value: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: e199c09839c24dbcabae3c77cc9715df
+          name: 'Swap % Usage'
+          key: 'system.swap.size[,pfree]'
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: 395a52eda6e54c8a8daa0dbe7af8770b
+              expression: 'min(/Template Linux INTEROP Custom/system.swap.size[,pfree],5s)<={$SWAP.PFREE.MIN.WARN} and last(/Template Linux INTEROP Custom/system.swap.size[,pfree])>{$SWAP.PFREE.MIN.AVG}'
+              name: 'Swap Percent Free hit threshold (<25 >10). Current value: {ITEM.LASTVALUE}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+                -
+                  name: 'Swap Percent Free hit threshold. (<10). Current value: {ITEM.LASTVALUE}'
+                  expression: 'min(/Template Linux INTEROP Custom/system.swap.size[,pfree],5s)<{$SWAP.PFREE.MIN.AVG}'
+            -
+              uuid: 99edba5004484e42be33651acc795b2b
+              expression: 'min(/Template Linux INTEROP Custom/system.swap.size[,pfree],5s)<{$SWAP.PFREE.MIN.AVG}'
+              name: 'Swap Percent Free hit threshold. (<10). Current value: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: 29f95ad536d94af397f1235d17b709c7
+          name: 'UpTime in Seconds'
+          key: system.uptime
+          units: uptime
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: c268241c445a47b7ab7493770eed4b01
+              expression: 'last(/Template Linux INTEROP Custom/system.uptime)>10m and last(/Template Linux INTEROP Custom/system.uptime)<=20m'
+              name: 'Uptime hit threshold (<1200 >600). Current value: {ITEM.LASTVALUE}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+                -
+                  name: 'Uptime hit threshold. (<600). Current value: {ITEM.LASTVALUE}'
+                  expression: 'last(/Template Linux INTEROP Custom/system.uptime)<=10m'
+            -
+              uuid: 9311e231f0de4a4d9299ee5d2928af99
+              expression: 'last(/Template Linux INTEROP Custom/system.uptime)<=10m'
+              name: 'Uptime hit threshold. (<600). Current value: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: 985949b57618494eab2cbc368975059c
+          name: 'Get /proc/diskstats'
+          key: 'vfs.file.contents[/proc/diskstats]'
+          history: 1h
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  var parsed = value.split("\n").reduce(function(acc, x, i) {
+                    parts = x.trim().split(/ +/)
+                    acc["values"][parts[2]] = parts
+                    acc["lld"].push({"{#DEVNAME}":parts[2]})
+                    return acc;
+                  }, {"values":{}, "lld": []});
+                  
+                  return JSON.stringify(parsed);
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+        -
+          uuid: 5981e9e3112046eebc4c94278dc7e63b
+          name: 'Physical Memory % Usage'
+          key: 'vm.memory.size[pavailable]'
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - 'return (100-value);'
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: c2e00b549bf84a00aca627429c6c7189
+              expression: 'min(/Template Linux INTEROP Custom/vm.memory.size[pavailable],5s)>={$MEMORY.UTIL.WARN} and last(/Template Linux INTEROP Custom/vm.memory.size[pavailable])<{$MEMORY.UTIL.MAX}'
+              name: 'Physical Memory % Usage hit threshold (>95 <98). Current value: {ITEM.LASTVALUE}'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+                -
+                  name: 'Physical Memory % Usage hit threshold. (>98). Current value: {ITEM.LASTVALUE}'
+                  expression: 'min(/Template Linux INTEROP Custom/vm.memory.size[pavailable],5s)>{$MEMORY.UTIL.MAX}'
+            -
+              uuid: a967ce9fd5e5448e86c45cee0bf0b5c9
+              expression: 'min(/Template Linux INTEROP Custom/vm.memory.size[pavailable],5s)>{$MEMORY.UTIL.MAX}'
+              name: 'Physical Memory % Usage hit threshold. (>98). Current value: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+        -
+          uuid: 9791a7d360fd430c81757a7ee4bf79b3
+          name: 'Zabbix agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,agent,available]'
+          history: 7d
+          description: 'Monitoring agent availability status'
+          valuemap:
+            name: zabbix.host.available
+          tags:
+            -
+              tag: 'Type Components'
+              value: OS
+          triggers:
+            -
+              uuid: 9169d346d39842fca4ada062ff7af2cb
+              expression: 'max(/Template Linux INTEROP Custom/zabbix[host,agent,available],{$AGENT.TIMEOUT})=0'
+              name: 'Zabbix agent is not available (for {$AGENT.TIMEOUT})'
+              priority: DISASTER
+              dependencies:
+                -
+                  name: 'Host down!'
+                  expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+      discovery_rules:
+        -
+          uuid: 6c6fa18ce625451a96bf9e5626e5ffcb
+          name: 'Discovery Services'
+          type: DEPENDENT
+          key: discovery.services
+          delay: '0'
+          item_prototypes:
+            -
+              uuid: 02fb6c0ab5a349d7b8eb2659910f335d
+              name: 'Service Status {#NAME}'
+              key: 'systemctl.status[{#NAME}]'
+              valuemap:
+                name: 'Linux Service State'
+              tags:
+                -
+                  tag: 'Type Application'
+                  value: 'System Service'
+              trigger_prototypes:
+                -
+                  uuid: 0ba846a431ff4c76a3839fb05f15fe65
+                  expression: 'last(/Template Linux INTEROP Custom/systemctl.status[{#NAME}])=0'
+                  name: 'Service {#NAME} with status: {ITEM.LASTVALUE}'
+                  priority: DISASTER
+          master_item:
+            key: services.raw
+          lld_macro_paths:
+            -
+              lld_macro: '{#NAME}'
+              path: $.name
+            -
+              lld_macro: '{#STATUS}'
+              path: $.status
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.data
+        -
+          uuid: b5ad337d7f1541d69067ac6d32ccf961
+          name: 'Network interface discovery'
+          key: net.if.discovery
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: A
+              -
+                macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
+                formulaid: B
+          item_prototypes:
+            -
+              uuid: cc5248f974af4488973500449cbeb768
+              name: 'Interface {#IFNAME}: Inbound Errors'
+              key: 'net.if.in["{#IFNAME}",errors]'
+              delay: 3m
+              history: 7d
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Network
+              trigger_prototypes:
+                -
+                  uuid: c34523e4d7274e508038bb1c66240493
+                  expression: 'last(/Template Linux INTEROP Custom/net.if.in["{#IFNAME}",errors])>100'
+                  name: 'Interface {#IFNAME}: Inbound Errors hit threshold (>100). Current value: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
+                -
+                  uuid: bd51091b77384feb9353e3943cf3f6cd
+                  expression: 'last(/Template Linux INTEROP Custom/net.if.in["{#IFNAME}",errors])>=75 and last(/Template Linux INTEROP Custom/net.if.in["{#IFNAME}",errors])<100'
+                  name: 'Interface {#IFNAME}: Inbound Errors hit threshold (>=75 <100). Current value: {ITEM.LASTVALUE}'
+                  priority: WARNING
+            -
+              uuid: b738637dc34b4c23a691fd7ac1dfb8a9
+              name: 'Interface {#IFNAME}: Download Bits Per sec'
+              key: 'net.if.in["{#IFNAME}"]'
+              delay: 3m
+              history: 7d
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Network
+            -
+              uuid: abf28906fa1d44469e0797ed3d622d55
+              name: 'Interface {#IFNAME}: Outbound Errors'
+              key: 'net.if.out["{#IFNAME}",errors]'
+              delay: 3m
+              history: 7d
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Network
+              trigger_prototypes:
+                -
+                  uuid: cf75be2711444f3d89b14f502bc54fae
+                  expression: 'last(/Template Linux INTEROP Custom/net.if.out["{#IFNAME}",errors])>=75 and last(/Template Linux INTEROP Custom/net.if.out["{#IFNAME}",errors])<100'
+                  name: 'Interface {#IFNAME}: Outbound Errors hit threshold (>=75 <100). Current value: {ITEM.LASTVALUE}'
+                  priority: WARNING
+                -
+                  uuid: 00828bcae4e84075bfdc09c7fb6610d1
+                  expression: 'last(/Template Linux INTEROP Custom/net.if.out["{#IFNAME}",errors])>100'
+                  name: 'nterface {#IFNAME}: Outbound Errors hit threshold (>100). Current value: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
+            -
+              uuid: ef85ddccc3e448d197a1e48bb1e794ef
+              name: 'Interface {#IFNAME}: Upload Bits per sec'
+              key: 'net.if.out["{#IFNAME}"]'
+              delay: 3m
+              history: 7d
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Network
+            -
+              uuid: 1a2aeea304f44f6e956060016140bd34
+              name: 'Interface {#IFNAME}: Interface Oper Status'
+              key: 'vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"]'
+              history: 7d
+              trends: '0'
+              description: |
+                Indicates the interface RFC2863 operational state as a string.
+                Possible values are:"unknown", "notpresent", "down", "lowerlayerdown", "testing","dormant", "up".
+                Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
+              valuemap:
+                name: 'IF-MIB::ifOperStatus'
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      var newvalue;
+                      switch(value) {
+                        case "up":
+                          newvalue = 1;
+                          break;
+                        case "down":
+                          newvalue = 2;
+                          break;
+                        case "testing":
+                          newvalue = 4;
+                          break;
+                        case "unknown":
+                          newvalue = 5;
+                          break;
+                        case "dormant":
+                          newvalue = 6;
+                          break;
+                        case "notPresent":
+                          newvalue = 7;
+                          break;
+                        default:
+                          newvalue = "Problem parsing interface operstate in JS";
+                      }
+                      return newvalue;
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Network
+              trigger_prototypes:
+                -
+                  uuid: 24e94a5f604742dab61eed6e940b82fe
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and ((last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))=1)'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2'
+                  name: 'Interface {#IFNAME}: Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  priority: DISASTER
+                  description: |
+                    This trigger expression works as follows:
+                    1. Can be triggered if operations status is down.
+                    2. {$IFCONTROL:"{#IFNAME}"}=1 - user can redefine Context macro to value - 0. That marks this interface as not important. No new trigger will be fired if this interface is down.
+                    3. {TEMPLATE_NAME:METRIC.diff()}=1) - trigger fires only if operational status was up(1) sometime before. (So, do not fire 'ethernal off' interfaces.)
+                    
+                    WARNING: if closed manually - won't fire again on next poll, because of .diff.
+          trigger_prototypes:
+            -
+              uuid: 9e3e869811f04df2a8535e1cd8668667
+              expression: 'min(/Template Linux INTEROP Custom/net.if.in["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"} or min(/Template Linux INTEROP Custom/net.if.out["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'max(/Template Linux INTEROP Custom/net.if.in["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8 and last(/Template Linux INTEROP Custom/net.if.out["{#IFNAME}",errors])<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8'
+              name: 'Interface {#IFNAME}: High error rate ( > {$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: AVERAGE
+              description: 'Recovers when below 80% of {$IF.ERRORS.WARN:"{#IFNAME}"} threshold'
+              dependencies:
+                -
+                  name: 'Interface {#IFNAME}: Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and ((last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))=1)'
+                  recovery_expression: 'last(/Template Linux INTEROP Custom/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2'
+        -
+          uuid: 9ec7c680f88c41a296f52aaf67ac3483
+          name: 'Block devices discovery'
+          type: DEPENDENT
+          key: vfs.dev.discovery
+          delay: '0'
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: A
+              -
+                macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.MATCHES}'
+                formulaid: B
+          item_prototypes:
+            -
+              uuid: 34eefd83cdf74198a785c3b0101996d2
+              name: '{#DEVNAME}: Disk average queue size'
+              type: DEPENDENT
+              key: 'vfs.dev.queue_size[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.values[''{#DEVNAME}''][13]'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/proc/diskstats]'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Storage
+              trigger_prototypes:
+                -
+                  uuid: 3c8ecab8617b4430b20bd295b4a98c01
+                  expression: 'last(/Template Linux INTEROP Custom/vfs.dev.queue_size[{#DEVNAME}])>=1 and last(/Template Linux INTEROP Custom/vfs.dev.queue_size[{#DEVNAME}])<2'
+                  name: '{#DEVNAME} Avg Disk Queue Size hit threshold (>=1 <2). Current value: {ITEM.LASTVALUE}'
+                  priority: WARNING
+                -
+                  uuid: 100bdd8caedf4537a62ac08877efdd6c
+                  expression: 'last(/Template Linux INTEROP Custom/vfs.dev.queue_size[{#DEVNAME}])>=2'
+                  name: '{#DEVNAME} Avg Disk Queue Size hit threshold (>=2). Current value: {ITEM.LASTVALUE}'
+                  priority: HIGH
+            -
+              uuid: 9373025f36d64f5f9d0793e3398569ed
+              name: '{#DEVNAME}: Disk read rate'
+              type: DEPENDENT
+              key: 'vfs.dev.read.rate[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: '!r/s'
+              description: 'r/s. The number (after merges) of read requests completed per second for the device.'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.values[''{#DEVNAME}''][3]'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'vfs.file.contents[/proc/diskstats]'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Storage
+            -
+              uuid: dc89a12d8781435ba36c8246de59edbb
+              name: '{#DEVNAME}: Disk read time (rate)'
+              type: DEPENDENT
+              key: 'vfs.dev.read.time.rate[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.values[''{#DEVNAME}''][6]'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/proc/diskstats]'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Storage
+            -
+              uuid: b6ad1b4ef9e44e47a08047905b239701
+              name: '{#DEVNAME}: Disk write rate'
+              type: DEPENDENT
+              key: 'vfs.dev.write.rate[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: '!w/s'
+              description: 'w/s. The number (after merges) of write requests completed per second for the device.'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.values[''{#DEVNAME}''][7]'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'vfs.file.contents[/proc/diskstats]'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Storage
+            -
+              uuid: e9bc8aaa0c8248db8e9d22c44b252ef4
+              name: '{#DEVNAME}: Disk write time (rate)'
+              type: DEPENDENT
+              key: 'vfs.dev.write.time.rate[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              description: 'Rate of total write time counter. Used in w_await calculation'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.values[''{#DEVNAME}''][10]'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/proc/diskstats]'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Storage
+          master_item:
+            key: 'vfs.file.contents[/proc/diskstats]'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.lld
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+        -
+          uuid: 293e8e2a6c3440ce8aac1dd82dbc032f
+          name: 'Mounted filesystem discovery'
+          key: vfs.fs.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: A
+              -
+                macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.MATCHES}'
+                formulaid: B
+              -
+                macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: C
+              -
+                macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.MATCHES}'
+                formulaid: D
+          item_prototypes:
+            -
+              uuid: d13ea0410cd148049ea6faaba93664e2
+              name: 'Disco :{#FSNAME} volume state RW / RO'
+              key: 'system.run[dir={#FSNAME}; (test -d $dir) && (ls $dir > /dev/null 2<&1) && (cat /proc/mounts | grep -v rootfs | awk ''{print $2 " " $4}'' | grep "^$dir" -m 1 | grep -o rw > /dev/null 2>&1) && echo 1 || echo 0]'
+              description: |
+                Se Retornar 1 = RW
+                Se Retornar 0 = RO
+                
+                Necessário que no arquivo de configuração do agent estar com a opção de comandos remotos Habilitado
+              valuemap:
+                name: 'volume state RW RO'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Disk
+              trigger_prototypes:
+                -
+                  uuid: 33a1dd876b554f49b9e5a3d14a80e14e
+                  expression: 'last(/Template Linux INTEROP Custom/system.run[dir={#FSNAME}; (test -d $dir) && (ls $dir > /dev/null 2<&1) && (cat /proc/mounts | grep -v rootfs | awk ''{print $2 " " $4}'' | grep "^$dir" -m 1 | grep -o rw > /dev/null 2>&1) && echo 1 || echo 0])=0'
+                  name: 'RW/RO status issue on Volume {#FSNAME}'
+                  priority: HIGH
+            -
+              uuid: 86faaa288b0f43559fcce3ab1b6b9ccd
+              name: '{#FSNAME}: % Used Space'
+              key: 'vfs.fs.size[{#FSNAME},pused]'
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: 'Type Components'
+                  value: Storage
+              trigger_prototypes:
+                -
+                  uuid: 46ef2d027c0f4bde9d5505439238b15d
+                  expression: 'min(/Template Linux INTEROP Custom/vfs.fs.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT}'
+                  name: '{#FSNAME}: Disk space is low (used > {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%)'
+                  priority: HIGH
+                  dependencies:
+                    -
+                      name: 'Host down!'
+                      expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+                -
+                  uuid: 72cb6052dbe046a89b625542a4c7ffe9
+                  expression: 'min(/Template Linux INTEROP Custom/vfs.fs.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.WARN}'
+                  name: '{#FSNAME}: Disk space is low (used > {$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}%)'
+                  priority: WARNING
+                  dependencies:
+                    -
+                      name: 'Host down!'
+                      expression: 'min(/Template Linux INTEROP Custom/hostalive,2m)=0'
+                    -
+                      name: '{#FSNAME}: Disk space is low (used > {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%)'
+                      expression: 'min(/Template Linux INTEROP Custom/vfs.fs.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.CRIT}'
+                -
+                  uuid: 8590d91884d84045a0e9809929b87946
+                  expression: 'min(/Template Linux INTEROP Custom/vfs.fs.size[{#FSNAME},pused],5m)>{$VFS.FS.PUSED.MAX.MED}'
+                  name: '{#FSNAME}: Disk space is low (used > {{$VFS.FS.PUSED.MAX.MED}:"{#FSNAME}"}%)'
+                  priority: AVERAGE
+      macros:
+        -
+          macro: '{$AGENT.TIMEOUT}'
+          value: 3m
+        -
+          macro: '{$CPU.UTIL.CRIT}'
+          value: '98'
+        -
+          macro: '{$CPU.UTIL.WARN}'
+          value: '95'
+        -
+          macro: '{$IF.ERRORS.WARN}'
+          value: '2'
+        -
+          macro: '{$IF.UTIL.MAX}'
+          value: '90'
+        -
+          macro: '{$IFCONTROL}'
+          value: '1'
+        -
+          macro: '{$MEMORY.UTIL.MAX}'
+          value: '98'
+        -
+          macro: '{$MEMORY.UTIL.WARN}'
+          value: '95'
+        -
+          macro: '{$NET.IF.IFNAME.MATCHES}'
+          value: '^.*$'
+        -
+          macro: '{$NET.IF.IFNAME.NOT_MATCHES}'
+          value: '(^Software Loopback Interface|^NULL[0-9.]*$|^[Ll]o[0-9.]*$|^[Ss]ystem$|^Nu[0-9.]*$|^veth[0-9a-z]+$|docker[0-9]+|br-[a-z0-9]{12})'
+          description: 'Filter out loopbacks, nulls, docker veth links and docker0 bridge by default'
+        -
+          macro: '{$SSH_PORT}'
+          value: '22'
+        -
+          macro: '{$SWAP.PFREE.MIN.AVG}'
+          value: '10'
+        -
+          macro: '{$SWAP.PFREE.MIN.WARN}'
+          value: '25'
+        -
+          macro: '{$VFS.DEV.DEVNAME.MATCHES}'
+          value: .+
+          description: 'This macro is used in block devices discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+          value: '^(loop[0-9]*|sd[a-z][0-9]+|nbd[0-9]+|sr[0-9]+|fd[0-9]+|dm-[0-9]+|ram[0-9]+)'
+          description: 'This macro is used in block devices discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.DEV.READ.AWAIT.WARN}'
+          value: '20'
+          description: 'Disk read average response time (in ms) before the trigger would fire'
+        -
+          macro: '{$VFS.DEV.WRITE.AWAIT.WARN}'
+          value: '20'
+          description: 'Disk write average response time (in ms) before the trigger would fire'
+        -
+          macro: '{$VFS.FS.FSNAME.MATCHES}'
+          value: .+
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+          value: ^(/dev|/sys|/run|/proc|.+/shm$)
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.FSTYPE.MATCHES}'
+          value: ^(btrfs|ext2|ext3|ext4|reiser|xfs|ffs|ufs|jfs|jfs2|vxfs|hfs|apfs|refs|ntfs|fat32|zfs)$
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+          value: ^\s$
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.INODE.PFREE.MIN.CRIT}'
+          value: '10'
+        -
+          macro: '{$VFS.FS.INODE.PFREE.MIN.WARN}'
+          value: '20'
+        -
+          macro: '{$VFS.FS.PUSED.MAX.CRIT}'
+          value: '98'
+        -
+          macro: '{$VFS.FS.PUSED.MAX.MED}'
+          value: '95'
+        -
+          macro: '{$VFS.FS.PUSED.MAX.WARN}'
+          value: '90'
+      valuemaps:
+        -
+          uuid: 6eef3a91a13b4d5986a64a7d7a48eab3
+          name: 'IF-MIB::ifOperStatus'
+          mappings:
+            -
+              value: '1'
+              newvalue: up
+            -
+              value: '2'
+              newvalue: down
+            -
+              value: '4'
+              newvalue: unknown
+            -
+              value: '5'
+              newvalue: dormant
+            -
+              value: '6'
+              newvalue: notPresent
+            -
+              value: '7'
+              newvalue: lowerLayerDown
+        -
+          uuid: 18641293c51c4d7f80b629ad1acfc8e7
+          name: 'Linux::Interface protocol types'
+          mappings:
+            -
+              value: '0'
+              newvalue: 'from KA9Q: NET/ROM pseudo'
+            -
+              value: '1'
+              newvalue: 'Ethernet 10Mbps'
+            -
+              value: '2'
+              newvalue: 'Experimental Ethernet'
+            -
+              value: '3'
+              newvalue: 'AX.25 Level 2'
+            -
+              value: '4'
+              newvalue: 'PROnet token ring'
+            -
+              value: '5'
+              newvalue: Chaosnet
+            -
+              value: '6'
+              newvalue: 'IEEE 802.2 Ethernet/TR/TB'
+            -
+              value: '7'
+              newvalue: ARCnet
+            -
+              value: '8'
+              newvalue: APPLEtalk
+            -
+              value: '15'
+              newvalue: 'Frame Relay DLCI'
+            -
+              value: '19'
+              newvalue: ATM
+            -
+              value: '23'
+              newvalue: 'Metricom STRIP (new IANA id)'
+            -
+              value: '24'
+              newvalue: 'IEEE 1394 IPv4 - RFC 2734'
+            -
+              value: '27'
+              newvalue: EUI-64
+            -
+              value: '32'
+              newvalue: InfiniBand
+            -
+              value: '256'
+              newvalue: ARPHRD_SLIP
+            -
+              value: '257'
+              newvalue: ARPHRD_CSLIP
+            -
+              value: '258'
+              newvalue: ARPHRD_SLIP6
+            -
+              value: '259'
+              newvalue: ARPHRD_CSLIP6
+            -
+              value: '260'
+              newvalue: 'Notional KISS type'
+            -
+              value: '264'
+              newvalue: ARPHRD_ADAPT
+            -
+              value: '270'
+              newvalue: ARPHRD_ROSE
+            -
+              value: '271'
+              newvalue: 'CCITT X.25'
+            -
+              value: '272'
+              newvalue: 'Boards with X.25 in firmware'
+            -
+              value: '280'
+              newvalue: 'Controller Area Network'
+            -
+              value: '512'
+              newvalue: ARPHRD_PPP
+            -
+              value: '513'
+              newvalue: 'Cisco HDLC'
+            -
+              value: '516'
+              newvalue: LAPB
+            -
+              value: '517'
+              newvalue: 'Digital''s DDCMP protocol'
+            -
+              value: '518'
+              newvalue: 'Raw HDLC'
+            -
+              value: '519'
+              newvalue: 'Raw IP'
+            -
+              value: '768'
+              newvalue: 'IPIP tunnel'
+            -
+              value: '769'
+              newvalue: 'IP6IP6 tunnel'
+            -
+              value: '770'
+              newvalue: 'Frame Relay Access Device'
+            -
+              value: '771'
+              newvalue: 'SKIP vif'
+            -
+              value: '772'
+              newvalue: 'Loopback device'
+            -
+              value: '773'
+              newvalue: 'Localtalk device'
+            -
+              value: '774'
+              newvalue: 'Fiber Distributed Data Interface'
+            -
+              value: '775'
+              newvalue: 'AP1000 BIF'
+            -
+              value: '776'
+              newvalue: 'sit0 device - IPv6-in-IPv4'
+            -
+              value: '777'
+              newvalue: 'IP over DDP tunneller'
+            -
+              value: '778'
+              newvalue: 'GRE over IP'
+            -
+              value: '779'
+              newvalue: 'PIMSM register interface'
+            -
+              value: '780'
+              newvalue: 'High Performance Parallel Interface'
+            -
+              value: '781'
+              newvalue: 'Nexus 64Mbps Ash'
+            -
+              value: '782'
+              newvalue: 'Acorn Econet'
+            -
+              value: '783'
+              newvalue: Linux-IrDA
+            -
+              value: '784'
+              newvalue: 'Point to point fibrechannel'
+            -
+              value: '785'
+              newvalue: 'Fibrechannel arbitrated loop'
+            -
+              value: '786'
+              newvalue: 'Fibrechannel public loop'
+            -
+              value: '787'
+              newvalue: 'Fibrechannel fabric'
+            -
+              value: '800'
+              newvalue: 'Magic type ident for TR'
+            -
+              value: '801'
+              newvalue: 'IEEE 802.11'
+            -
+              value: '802'
+              newvalue: 'IEEE 802.11 + Prism2 header'
+            -
+              value: '803'
+              newvalue: 'IEEE 802.11 + radiotap header'
+            -
+              value: '804'
+              newvalue: ARPHRD_IEEE802154
+            -
+              value: '805'
+              newvalue: 'IEEE 802.15.4 network monitor'
+            -
+              value: '820'
+              newvalue: 'PhoNet media type'
+            -
+              value: '821'
+              newvalue: 'PhoNet pipe header'
+            -
+              value: '822'
+              newvalue: 'CAIF media type'
+            -
+              value: '823'
+              newvalue: 'GRE over IPv6'
+            -
+              value: '824'
+              newvalue: 'Netlink header'
+            -
+              value: '825'
+              newvalue: 'IPv6 over LoWPAN'
+            -
+              value: '826'
+              newvalue: 'Vsock monitor header'
+        -
+          uuid: 87f8bb12c092497f92731edfa47308fb
+          name: 'Linux Service State'
+          mappings:
+            -
+              value: '1'
+              newvalue: Active
+            -
+              value: '0'
+              newvalue: Inactive
+        -
+          uuid: c6388bd74e7444cfa6592bd4a9088bc3
+          name: 'volume state RW RO'
+          mappings:
+            -
+              value: '1'
+              newvalue: 'Write Enabled'
+            -
+              value: '0'
+              newvalue: 'Disabled for Write'
+        -
+          uuid: 1319d780be1848ca867b27aaa932ea74
+          name: zabbix.host.available
+          mappings:
+            -
+              value: '0'
+              newvalue: 'not available'
+            -
+              value: '1'
+              newvalue: available
+            -
+              value: '2'
+              newvalue: unknown
+        -
+          uuid: 3de4758123714e238d28b0830d84813c
+          name: 'Zabbix agent ping status'
+          mappings:
+            -
+              value: '1'
+              newvalue: Up
